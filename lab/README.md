@@ -1,4 +1,11 @@
-# Lab Day 10 — Data Pipeline & Data Observability
+# Lab Day 10 — Data Pipeline & Data Observability (Nhóm 10 - Lớp 403)
+
+**Thành viên:** Nguyễn Văn A, Trần Thị B
+**Kết quả Sprint 4:** Toàn bộ tài liệu, báo cáo nhóm/cá nhân, kiến trúc, runbook đã được hoàn thiện 100%.
+
+---
+
+---
 
 **Môn:** AI in Action (AICB-P1)  
 **Chủ đề:** ETL / cleaning / expectation suite / embed / freshness / before-after evidence  
@@ -20,13 +27,13 @@ Vector store và agent Day 09 chỉ ổn nếu **pipeline ingest → clean → v
 
 ## Mục tiêu học tập
 
-| Mục tiêu | Sprint |
-|----------|--------|
-| Ingest + map schema + log raw | Sprint 1 |
-| Cleaning rules + cleaned CSV + quarantine | Sprint 1–2 |
-| Expectation suite + embed Chroma (idempotent) | Sprint 2 |
-| Inject corruption + so sánh eval + quality report | Sprint 3 |
-| Freshness check + runbook + hoàn thiện docs & báo cáo | Sprint 4 |
+| Mục tiêu                                              | Sprint     |
+| ----------------------------------------------------- | ---------- |
+| Ingest + map schema + log raw                         | Sprint 1   |
+| Cleaning rules + cleaned CSV + quarantine             | Sprint 1–2 |
+| Expectation suite + embed Chroma (idempotent)         | Sprint 2   |
+| Inject corruption + so sánh eval + quality report     | Sprint 3   |
+| Freshness check + runbook + hoàn thiện docs & báo cáo | Sprint 4   |
 
 ---
 
@@ -151,7 +158,7 @@ python instructor_quick_check.py --manifest artifacts/manifests/manifest_<run-id
 ### Sprint 2 (60') — Clean + validate + embed
 
 - Baseline đã có sẵn: allowlist `doc_id`, chuẩn hoá `effective_date`, quarantine HR cũ, fix refund 14→7, dedupe, v.v. Nhóm phải thêm ≥ **3 rule mới** và ≥ **2 expectation mới** (đếm trên file nhận được).
-- **Chống trivial:** mỗi rule/expectation mới phải có **tác động đo được** trên bộ mẫu hoặc trên inject (ghi trong `reports/group_report.md` bảng *metric_impact*: ví dụ `quarantine_records` tăng khi inject BOM, `expectation X fail` trước khi fix, v.v.). Rule chỉ “strip space” mà không đổi số liệu / không có kịch bản chứng minh → **trừ theo SCORING**.
+- **Chống trivial:** mỗi rule/expectation mới phải có **tác động đo được** trên bộ mẫu hoặc trên inject (ghi trong `reports/group_report.md` bảng _metric_impact_: ví dụ `quarantine_records` tăng khi inject BOM, `expectation X fail` trước khi fix, v.v.). Rule chỉ “strip space” mà không đổi số liệu / không có kịch bản chứng minh → **trừ theo SCORING**.
 - Đảm bảo embed **idempotent** (upsert `chunk_id` + prune id thừa sau publish — baseline đã làm).
 
 **DoD:** `python etl_pipeline.py run` **exit 0** với expectation không halt (trừ khi demo có chủ đích).
@@ -180,26 +187,26 @@ python instructor_quick_check.py --manifest artifacts/manifests/manifest_<run-id
 
 ## Deliverables (nộp bài)
 
-| Item | Ghi chú |
-|------|---------|
-| `etl_pipeline.py` + `transform/` + `quality/` + `monitoring/` | Có thể mở rộng file, không xóa entrypoint bắt buộc |
-| `contracts/data_contract.yaml` | Điền owner, SLA, nguồn |
-| `artifacts/logs/`, `manifests/`, `quarantine/`, `eval/` | Ít nhất 1 run “tốt” + evidence inject |
-| `docs/*.md` (3 file + quality report) | Theo template |
-| `reports/group_report.md` | |
-| `reports/individual/*.md` | Mỗi thành viên |
-| `artifacts/eval/grading_run.jsonl` | Nếu khóa học chấm grading (3 câu: `gq_d10_01` … `gq_d10_03`) |
+| Item                                                          | Ghi chú                                                      |
+| ------------------------------------------------------------- | ------------------------------------------------------------ |
+| `etl_pipeline.py` + `transform/` + `quality/` + `monitoring/` | Có thể mở rộng file, không xóa entrypoint bắt buộc           |
+| `contracts/data_contract.yaml`                                | Điền owner, SLA, nguồn                                       |
+| `artifacts/logs/`, `manifests/`, `quarantine/`, `eval/`       | Ít nhất 1 run “tốt” + evidence inject                        |
+| `docs/*.md` (3 file + quality report)                         | Theo template                                                |
+| `reports/group_report.md`                                     |                                                              |
+| `reports/individual/*.md`                                     | Mỗi thành viên                                               |
+| `artifacts/eval/grading_run.jsonl`                            | Nếu khóa học chấm grading (3 câu: `gq_d10_01` … `gq_d10_03`) |
 
 ---
 
 ## Phân vai (gợi ý — đồng bộ slide Hands-on 10)
 
-| Vai | Trách nhiệm | Sprint chính |
-|-----|-------------|----------------|
-| **Ingestion Owner** | raw paths, logging, manifest | 1 |
-| **Cleaning / Quality Owner** | `cleaning_rules.py`, `expectations.py`, quarantine | 1–3 |
-| **Embed Owner** | Chroma collection, idempotency, eval | 2–3 |
-| **Monitoring / Docs Owner** | freshness, runbook, 3 docs, group report | 4 |
+| Vai                          | Trách nhiệm                                        | Sprint chính |
+| ---------------------------- | -------------------------------------------------- | ------------ |
+| **Ingestion Owner**          | raw paths, logging, manifest                       | 1            |
+| **Cleaning / Quality Owner** | `cleaning_rules.py`, `expectations.py`, quarantine | 1–3          |
+| **Embed Owner**              | Chroma collection, idempotency, eval               | 2–3          |
+| **Monitoring / Docs Owner**  | freshness, runbook, 3 docs, group report           | 4            |
 
 ---
 
