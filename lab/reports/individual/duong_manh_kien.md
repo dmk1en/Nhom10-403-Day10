@@ -1,8 +1,8 @@
 # Báo Cáo Cá Nhân — Lab Day 10: Data Pipeline & Observability
 
-**Họ và tên:** ___________
+**Họ và tên:** Dương Mạnh Kiên
 **Vai trò:** Ingestion Owner (Sprint 1) & Cleaning / Quality Owner (Sprint 2)
-**Ngày nộp:** ___________
+**Ngày nộp:** 4/15/2026
 **Độ dài yêu cầu:** 400–650 từ
 
 ---
