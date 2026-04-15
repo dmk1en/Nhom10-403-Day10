@@ -60,21 +60,25 @@ FAIL {"latest_exported_at": "2026-04-10T08:00:00", "age_hours": 121.6, "sla_hour
 
 ## 4. Bằng chứng trước / sau
 
-**run_id run clean:** `sprint2` | **run_id run inject:** `inject-bad-sprint3`
+**Phần phụ trách của tôi là Monitoring, nên bằng chứng before/after là từ freshness check — việc tôi chạy và tài liệu hóa trong runbook.**
 
-Trích từ `artifacts/eval/before_clean_eval.csv` (sprint2 — pipeline chuẩn):
-```
-q_refund_window | contains_expected=yes | hits_forbidden=no
-```
+**run_id:** `sprint2` (manifest do Sprint 2 tạo, tôi dùng để viết runbook)
 
-Trích từ `artifacts/eval/after_inject_eval.csv` (inject-bad-sprint3 — bỏ fix):
+Trích log freshness **trước khi có runbook giải thích** (chạy `python etl_pipeline.py freshness --manifest artifacts/manifests/manifest_sprint2.json`):
 ```
-q_refund_window | contains_expected=yes | hits_forbidden=yes
+FAIL {"latest_exported_at": "2026-04-10T08:00:00", "age_hours": 120.75,
+      "sla_hours": 24.0, "reason": "freshness_sla_exceeded"}
 ```
 
-**Diễn giải:** `contains_expected=yes` ở cả hai run (top-1 đều "7 ngày"), nhưng sau inject `hits_forbidden=yes` — chunk stale "14 ngày" xuất hiện trong top-k context. Đây là bằng chứng rằng **context poisoning** xảy ra dù top-1 trông đúng. Metric `hits_forbidden` trong `eval_retrieval.py` phát hiện anomaly này — được tôi giải thích chi tiết trong `docs/runbook.md` mục Detection.
+**run_id:** `final_run` (manifest tôi tạo ở Sprint 4)
 
-Kết quả grading (`artifacts/eval/grading_run.jsonl`): `gq_d10_01`: `contains_expected=true`, `hits_forbidden=false` ✅ | `gq_d10_03`: `contains_expected=true`, `hits_forbidden=false`, `top1_doc_matches=true` ✅ → đạt điều kiện **Merit**.
+Trích log freshness **sau khi pipeline đã được tài liệu hóa đầy đủ**:
+```
+FAIL {"latest_exported_at": "2026-04-10T08:00:00", "age_hours": 121.6,
+      "sla_hours": 24.0, "reason": "freshness_sla_exceeded"}
+```
+
+**Diễn giải:** Cả hai đều `FAIL` — đây là **expected behavior đã được tài liệu hóa** trong `docs/runbook.md`. Trước Sprint 4, kết quả FAIL này không có giải thích → team dễ nhầm là pipeline lỗi. Sau khi tôi viết runbook, rõ ràng rằng FAIL phản ánh "data snapshot cũ" chứ không phải "pipeline broken". Đây là giá trị cụ thể của Monitoring/Docs Owner: **biến alert khó hiểu thành incident playbook có thể hành động được**.
 
 ---
 
