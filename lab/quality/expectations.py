@@ -10,6 +10,8 @@ import re
 from dataclasses import dataclass
 from typing import Any, Dict, List, Tuple
 
+from transform.cleaning_rules import ALLOWED_DOC_IDS
+
 
 @dataclass
 class ExpectationResult:
@@ -109,6 +111,34 @@ def run_expectations(cleaned_rows: List[Dict[str, Any]]) -> Tuple[List[Expectati
             ok6,
             "halt",
             f"violations={len(bad_hr_annual)}",
+        )
+    )
+
+    # E7 (mới): tất cả doc_id trong cleaned phải thuộc allowlist — double-check sau cleaning rule
+    # metric_impact: nếu cleaning rule 1 bỏ sót một doc_id lạ, expectation này halt ngay.
+    # severity: halt — doc_id không hợp lệ làm vector store bị ô nhiễm.
+    bad_doc_ids = [r for r in cleaned_rows if (r.get("doc_id") or "") not in ALLOWED_DOC_IDS]
+    ok7 = len(bad_doc_ids) == 0
+    results.append(
+        ExpectationResult(
+            "all_doc_ids_in_allowlist",
+            ok7,
+            "halt",
+            f"unknown_doc_id_count={len(bad_doc_ids)}",
+        )
+    )
+
+    # E8 (mới): chunk_text không được vượt quá 2000 ký tự — phát hiện DB export bị nối nhầm chunk
+    # metric_impact: inject một row có text > 2000 ký tự → expectation warn, xuất hiện trong log.
+    # severity: warn — chunk dài không block pipeline nhưng cần kiểm tra thủ công.
+    long_chunks = [r for r in cleaned_rows if len((r.get("chunk_text") or "")) > 2000]
+    ok8 = len(long_chunks) == 0
+    results.append(
+        ExpectationResult(
+            "max_chunk_text_length_2000",
+            ok8,
+            "warn",
+            f"long_chunks={len(long_chunks)}",
         )
     )
 

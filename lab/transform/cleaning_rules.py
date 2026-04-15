@@ -77,6 +77,14 @@ def clean_rows(
     4) Quarantine: chunk_text rỗng hoặc effective_date rỗng sau chuẩn hoá.
     5) Loại trùng nội dung chunk_text (giữ bản đầu).
     6) Fix stale refund: policy_refund_v4 chứa '14 ngày làm việc' → 7 ngày.
+
+    Rule mới (Sprint 2 — có metric_impact):
+    7) Quarantine: exported_at rỗng — thiếu timestamp nguồn làm freshness check vô nghĩa.
+       metric_impact: row 12 trong policy_export_dirty.csv → quarantine_records tăng 1.
+    8) Quarantine: chunk_text quá ngắn (< 20 ký tự sau strip) — noise, không đủ thông tin truy xuất.
+       metric_impact: row 11 "OK." (3 ký tự) → quarantine_records tăng 1 so với baseline.
+    9) Fix: chuẩn hoá khoảng trắng thừa trong chunk_text (tab / nhiều dấu cách liên tiếp → 1 dấu cách).
+       metric_impact: row 13 có 15+ dấu cách kép → chunk_text khác nhau trước/sau trong cleaned CSV.
     """
     quarantine: List[Dict[str, Any]] = []
     seen_text: set[str] = set()
@@ -111,9 +119,22 @@ def clean_rows(
             )
             continue
 
+        # Rule 7: exported_at bắt buộc — thiếu timestamp làm freshness check mất ý nghĩa
+        if not exported_at:
+            quarantine.append({**raw, "reason": "missing_exported_at"})
+            continue
+
         if not text:
             quarantine.append({**raw, "reason": "missing_chunk_text"})
             continue
+
+        # Rule 8: chunk_text quá ngắn (0 < len < 20) — không đủ thông tin để truy xuất
+        if len(text) < 20:
+            quarantine.append({**raw, "reason": "short_chunk_text", "chunk_text_len": len(text)})
+            continue
+
+        # Rule 9: chuẩn hoá khoảng trắng thừa (tab, nhiều space liên tiếp → 1 space)
+        text = re.sub(r"[ \t]+", " ", text).strip()
 
         key = _norm_text(text)
         if key in seen_text:

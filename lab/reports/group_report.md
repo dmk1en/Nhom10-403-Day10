@@ -41,17 +41,24 @@ _________________
 
 ### 2a. Bảng metric_impact (bắt buộc — chống trivial)
 
-| Rule / Expectation mới (tên ngắn) | Trước (số liệu) | Sau / khi inject (số liệu) | Chứng cứ (log / CSV / commit) |
-|-----------------------------------|------------------|-----------------------------|-------------------------------|
-| … | … | … | … |
+| Rule / Expectation mới (tên ngắn) | Trước (số liệu) | Sau (số liệu) | Chứng cứ (log / CSV) |
+|-----------------------------------|-----------------|---------------|----------------------|
+| `rule_quarantine_missing_exported_at` (Rule 7) | row 12 (sla_p1_2026, exported_at rỗng) sẽ vào cleaned | `quarantine_records` sprint1=4 → sprint2=6 (+1 từ row 12) | `quarantine_sprint2.csv`: row 12 reason=`missing_exported_at` |
+| `rule_quarantine_short_chunk_below_20` (Rule 8) | row 11 "OK." (3 ký tự) sẽ vào cleaned và warn expectation E4 | `quarantine_records` tăng thêm 1; E4 không cần warn nữa | `quarantine_sprint2.csv`: row 11 reason=`short_chunk_text`, `chunk_text_len=3` |
+| `rule_normalize_whitespace_in_chunk_text` (Rule 9) | row 13 "Nhân  viên  được..." với 15+ double-space | `cleaned_sprint2.csv`: row 13 → "Nhân viên được phép đăng ký nghỉ phép qua hệ thống HR Portal ít nhất 3 ngày trước." (1 space) | `cleaned_sprint2.csv` dòng cuối |
+| `E7 all_doc_ids_in_allowlist` (halt) | Nếu rule 1 bỏ sót doc_id lạ → vector store nhiễm | Sprint 3 inject `--skip-validate` bỏ qua, nhưng run chuẩn: `unknown_doc_id_count=0 OK` | `run_sprint2.log`: `expectation[all_doc_ids_in_allowlist] OK (halt)` |
+| `E8 max_chunk_text_length_2000` (warn) | Không giới hạn độ dài → DB export nối chunk nhầm lọt qua | Sprint 3: inject row > 2000 ký tự → expectation warn xuất hiện trong log | `run_sprint2.log`: `expectation[max_chunk_text_length_2000] OK (warn) :: long_chunks=0` |
 
 **Rule chính (baseline + mở rộng):**
 
-- …
+- **Baseline**: unknown_doc_id, missing/invalid effective_date, stale_hr_policy_effective_date, missing_chunk_text, duplicate_chunk_text, fix_stale_refund_14→7
+- **Sprint 2 mới**: missing_exported_at (Rule 7), short_chunk_text < 20 chars (Rule 8), normalize_whitespace (Rule 9)
 
-**Ví dụ 1 lần expectation fail (nếu có) và cách xử lý:**
+**Kết quả sprint2:** raw=13, cleaned=7 (+1 row 13 normalized), quarantine=6 (+2 so với sprint1)
 
-_________________
+**Ví dụ 1 lần expectation fail và cách xử lý:**
+
+Sprint 3 inject (`--no-refund-fix --skip-validate`): `expectation[refund_no_stale_14d_window] FAIL (halt) :: violations=1` — pipeline bị halt nếu không có `--skip-validate`. Fix: chạy lại pipeline chuẩn (không có flag inject) → expectation pass, refund window = 7 ngày.
 
 ---
 
