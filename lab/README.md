@@ -1,9 +1,21 @@
 # Lab Day 10 — Data Pipeline & Data Observability (Nhóm 10 - Lớp 403)
 
-**Thành viên:** Nguyễn Văn A, Trần Thị B
+**Thành viên:** Tạ Vĩnh Phúc, Vũ Trung Lập, Nguyễn Văn Hiếu, Bùi Quang Hải, Dương Mạnh Kiên
 **Kết quả Sprint 4:** Toàn bộ tài liệu, báo cáo nhóm/cá nhân, kiến trúc, runbook đã được hoàn thiện 100%.
 
 ---
+
+## ⚡ Quick Start (Lệnh chạy một dòng)
+
+Để chạy toàn bộ pipeline ETL từ nạp dữ liệu, làm sạch, kiểm tra chất lượng đến nhúng vector:
+```bash
+python etl_pipeline.py run --run-id final_run
+```
+
+Kiểm tra báo cáo độ tươi mới (Freshness) để giám sát:
+```bash
+python etl_pipeline.py freshness --manifest artifacts/manifests/manifest_final_run.json
+```
 
 ---
 
